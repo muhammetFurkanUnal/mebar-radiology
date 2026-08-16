@@ -176,7 +176,7 @@ def build_manifest(root: Path) -> list[dict[str, object]]:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Create an EDA-ready NRRD manifest.")
-    parser.add_argument("--output", type=Path, default=Path("data/processed/manifest.csv"))
+    parser.add_argument("--output", type=Path, default=Path("data/manifest.csv"))
     args = parser.parse_args()
     root = Path(__file__).resolve().parents[1]
     rows = build_manifest(root)
