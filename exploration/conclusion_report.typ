@@ -86,8 +86,8 @@ When all the data is counted and translated into a table; modality, label and nu
   [Distribution of response groups by modality],
   header: (
     [Modality],
-    [Responder],
     [Intermediate],
+    [Non-Responder],
     [Non-Responder],
     [Total],
   ),
