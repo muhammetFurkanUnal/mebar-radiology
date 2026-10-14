@@ -2,8 +2,8 @@
     "excluded_sample_ids": [],
     "resample": {
 		"apply":true,
-		"ADC_spacing_mm": [0.5, 0.5, 3.0],
-		"T2_spacing_mm": [0.5, 0.5, 3.0]
+		"ADC_spacing_mm": [1.332626, 1.332626, 4.566809],
+		"T2_spacing_mm": [0.533377, 0.533377, 4.114692]
     },
     "crop": {
       	"apply":true,
