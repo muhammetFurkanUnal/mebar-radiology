@@ -1,0 +1,36 @@
+{
+    "excluded_sample_ids": [],
+    "resample": {
+		"apply":true,
+		"ADC_spacing_mm": [0.5, 0.5, 3.0],
+		"T2_spacing_mm": [0.5, 0.5, 3.0]
+    },
+    "crop": {
+      	"apply":true,
+      	"volume_mm": [10, 10, 30]
+    },
+    "bias_field_correction": {
+      	"apply": true
+    },
+    "T2_intensity": {
+		"interval": {
+			"apply":true,
+			"lower":0.005,
+			"upper":0.995
+		},
+		"zscore": {
+			"apply":true	
+		}
+    },
+	"ADC_zero_negatives": {
+		"apply":true
+	},
+	"ADC_scale_imbalance_fix": {
+		"apply":true,
+		"threshold":10,
+		"crop_out_of_bounds":true,
+		"global_zscore": true
+	},
+	"output_folder_path":"./output/no_alignment"
+}
+  

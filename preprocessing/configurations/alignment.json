@@ -1,0 +1,25 @@
+{
+	"excluded_sample_ids": [],
+	"resample": {
+		"apply":true,
+		"spacing_mm": [0.5, 0.5, 3.0]
+	},
+	"crop": {
+		"apply":true,
+		"volume_mm": [10, 10, 30]
+	},
+	"bias_field_correction": {
+		"apply": true
+	},
+	"intensity": {
+		"interval": {
+			"apply":true,
+			"lower":0.005,
+			"upper":0.995
+		},
+		"zscore": {
+			"apply":true	
+		}
+	}
+  }
+  

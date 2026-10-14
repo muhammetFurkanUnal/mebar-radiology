@@ -88,7 +88,7 @@ When all the data is counted and translated into a table; modality, label and nu
     [Modality],
     [Intermediate],
     [Non-Responder],
-    [Non-Responder],
+    [Responder],
     [Total],
   ),
   (
@@ -564,7 +564,7 @@ So zeroing negative values and rescaling small-unit ADC imagings can safely be a
 After all the analysis, we will be applying all the manipulations \[1\], \[2\], \[3\] and \[4\]:
 
 + Eliminate patient GUL, ABDULLAH.
-+ Crop the tumor are and resample the shape and spacings.
++ Crop the tumor area and resample the shape and spacings.
 + Apply z-score intensity normalization on T2 imagings.
 + Zero negative values and rescale x1000 small-unit ADC imagings.
 
