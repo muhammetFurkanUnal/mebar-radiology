@@ -38,7 +38,7 @@ class Intensity(BaseModel):
     zscore: Apply
 
 
-# --- alignment.json ---------------------------------------------------------
+# --- alignment.json ------------------------------------------
 
 
 class AlignmentResample(BaseModel):
