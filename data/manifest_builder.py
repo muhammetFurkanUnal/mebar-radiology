@@ -26,9 +26,9 @@ COLUMNS = [
     "image_filename", "mask_filename", "nrrd_file_count", "other_file_count",
     "image_candidate_count", "mask_candidate_count",
     "image_dimension", "image_shape_x", "image_shape_y", "image_shape_z", "image_dtype",
-    "image_encoding", "image_spacing_x_mm", "image_spacing_y_mm", "image_spacing_z_mm", "image_origin",
+    "image_encoding", "image_spacing_x_mm", "image_spacing_y_mm", "image_spacing_z_mm", "image_origin", "image_space",
     "mask_dimension", "mask_shape_x", "mask_shape_y", "mask_shape_z", "mask_dtype",
-    "mask_encoding", "mask_spacing_x_mm", "mask_spacing_y_mm", "mask_spacing_z_mm", "mask_origin",
+    "mask_encoding", "mask_spacing_x_mm", "mask_spacing_y_mm", "mask_spacing_z_mm", "mask_origin", "mask_space",
     "shape_matches", "spacing_matches", "origin_matches", "is_valid_sample", "validation_errors",
     "manifest_created_at",
 ]
@@ -78,14 +78,14 @@ def read_nrrd_header(path: Path) -> dict[str, object]:
             "spacing_x_mm": spacing[0] if len(spacing) > 0 else None,
             "spacing_y_mm": spacing[1] if len(spacing) > 1 else None,
             "spacing_z_mm": spacing[2] if len(spacing) > 2 else None,
-            "origin": header_value(header, "space origin"), "read_error": None,
+            "origin": header_value(header, "space origin"), "space": header_value(header, "space"), "read_error": None,
         }
     except (OSError, UnicodeDecodeError, ValueError) as error:
         return {"read_error": f"header_read_error:{type(error).__name__}"}
 
 
 def metadata(prefix: str, values: dict[str, object]) -> dict[str, object]:
-    fields = ("dimension", "shape_x", "shape_y", "shape_z", "dtype", "encoding", "spacing_x_mm", "spacing_y_mm", "spacing_z_mm", "origin")
+    fields = ("dimension", "shape_x", "shape_y", "shape_z", "dtype", "encoding", "spacing_x_mm", "spacing_y_mm", "spacing_z_mm", "origin", "space")
     return {f"{prefix}_{field}": values.get(field) for field in fields}
 
 
