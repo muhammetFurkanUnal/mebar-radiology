@@ -1,13 +1,14 @@
 {
+	"manifest_path": "/home/furkan/projects/mebar-radiology/data/manifest.csv",
     "excluded_sample_ids": [],
     "resample": {
 		"apply":true,
-		"ADC_spacing_mm": [1.332626, 1.332626, 4.566809],
-		"T2_spacing_mm": [0.533377, 0.533377, 4.114692]
+		"ADC_spacing_mm": [1.3, 1.3, 4.6],
+		"T2_spacing_mm": [0.5, 0.5, 4.1]
     },
     "crop": {
       	"apply":true,
-      	"volume_mm": [10, 10, 30]
+      	"volume_mm": [54, 68, 70]
     },
     "bias_field_correction": {
       	"apply": true
@@ -31,6 +32,6 @@
 		"crop_out_of_bounds":true,
 		"global_zscore": true
 	},
-	"output_folder_path":"./output/no_alignment"
+	"output_folder_path":"/home/furkan/projects/mebar-radiology/preprocessing/configurations/output/no_alignment"
 }
   

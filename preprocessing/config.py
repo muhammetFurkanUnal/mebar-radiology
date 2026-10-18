@@ -72,6 +72,7 @@ class ADCScaleImbalanceFix(BaseModel):
 
 class NoAlignmentConfig(BaseModel):
     excluded_sample_ids: list[str]
+    manifest_path: str
     resample: NoAlignmentResample
     crop: Crop
     bias_field_correction: Apply
