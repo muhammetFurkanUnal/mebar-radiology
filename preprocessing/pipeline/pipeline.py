@@ -13,16 +13,21 @@ class Pipeline:
         if isinstance(config, NoAlignmentConfig):
             from .steps import (
                 Resample,
-                CropROI
+                CropROI,
+                CropAreaHighlight
             )
             resample = Resample(
                 target_spacing=config.resample.ADC_spacing_mm if modality == "ADC" else config.resample.T2_spacing_mm
             )
             self.pipeline.append(resample.step)
-            crop_roi = CropROI(
+            # crop_roi = CropROI(
+            #     volume_mm=config.crop.volume_mm
+            # )
+            # self.pipeline.append(crop_roi.step)
+            highlight = CropAreaHighlight(
                 volume_mm=config.crop.volume_mm
             )
-            self.pipeline.append(crop_roi.step)
+            self.pipeline.append(highlight.step)
 
         # if CURRENT CONFIGURATION
         # alignment.json:

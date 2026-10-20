@@ -1,5 +1,5 @@
 {
-	"manifest_path": "/home/furkan/projects/mebar-radiology/data/manifest.csv",
+	"manifest_path": "/Users/furkan/projects/mebar-radiology/data/manifest.csv",
     "excluded_sample_ids": [],
     "resample": {
 		"apply":true,
@@ -32,6 +32,6 @@
 		"crop_out_of_bounds":true,
 		"global_zscore": true
 	},
-	"output_folder_path":"/home/furkan/projects/mebar-radiology/preprocessing/configurations/output/no_alignment"
+	"output_folder_path":"/Users/furkan/projects/mebar-radiology/preprocessing/output/no_alignment"
 }
   

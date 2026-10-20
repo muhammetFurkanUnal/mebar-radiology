@@ -42,7 +42,7 @@ def resample_image(
     resample_filter.SetOutputDirection(image_image.GetDirection())
     resample_filter.SetOutputOrigin(image_image.GetOrigin())
     # if some voxels goes above boundary, we set a default value for erroneous voxels
-    resample_filter.SetDefaultPixelValue(image_image.GetPixelIDValue()) 
+    resample_filter.SetDefaultPixelValue(0) 
     # identity transformation, we gotta give a type of transformation but we actually don't need, so identity
     resample_filter.SetTransform(sitk.Transform())
     if is_mask:
@@ -82,7 +82,6 @@ def crop_ROI(
     stats.Execute(mask_image)
     bbox = stats.GetBoundingBox(1)
     x0, y0, z0, x_len, y_len, z_len = bbox
-
     x_cen, y_cen, z_cen = x0 + x_len/2, y0+y_len/2, z0+z_len/2
 
     vox_dims = [
@@ -90,7 +89,15 @@ def crop_ROI(
         for spacing, dim in zip(image_image.GetSpacing(), mm_dims)
     ]
 
-    x0, y0, z0 = int(round(x_cen-vox_dims[0]/2)), int(round(y_cen-vox_dims[1]/2)), int(round(z_cen-vox_dims[2]/2))
+    vox_dims = [
+        min(size, vox) for size, vox in zip(image_image.GetSize(), vox_dims)
+    ]
+
+    # clamping - limiting upper and lower bound to be inside of the image fov
+    x_size, y_size, z_size = image_image.GetSize()
+    x0 = int(max(0, min(x_size-vox_dims[0], x_cen-vox_dims[0]/2)))
+    y0 = int(max(0, min(y_size-vox_dims[1], y_cen-vox_dims[1]/2)))
+    z0 = int(max(0, min(z_size-vox_dims[2], z_cen-vox_dims[2]/2)))
 
     # debugging
     print("original image size: ", image_image.GetSize())
@@ -106,8 +113,56 @@ def crop_ROI(
         sitk.WriteImage(ROI_mask, out_path[0])
         sitk.WriteImage(ROI_image, out_path[1])
 
-
     return ROI_mask, ROI_image
+
+
+def crop_area_highlight(
+    mask_image:sitk.Image,
+    image_image:sitk.Image,
+    mm_dims,
+    out_path=None
+    ):
+
+    # calculate tumor centered bbox starts and dims 
+    stats = sitk.LabelShapeStatisticsImageFilter()
+    stats.Execute(mask_image)
+    bbox = stats.GetBoundingBox(1)
+    x0, y0, z0, x_len, y_len, z_len = bbox
+    x_cen, y_cen, z_cen = x0+x_len/2, y0+y_len/2, z0+z_len/2
+
+    vox_dims = [
+        int(round(dim/spacing))
+        for spacing, dim in zip(image_image.GetSpacing(), mm_dims)
+    ]
+    vox_dims = [
+        min(size, vox) for size, vox in zip(image_image.GetSize(), vox_dims)
+    ]
+    
+    # clamping - limiting upper and lower bound to be inside of the image fov
+    x_size, y_size, z_size = image_image.GetSize()
+    x0 = int(max(0, min(x_size-vox_dims[0], x_cen-vox_dims[0]/2)))
+    y0 = int(max(0, min(y_size-vox_dims[1], y_cen-vox_dims[1]/2)))
+    z0 = int(max(0, min(z_size-vox_dims[2], z_cen-vox_dims[2]/2)))
+
+    print("x,y,z start: ", x0, y0, z0)
+    print("vox_dims: ", vox_dims)
+    print("size: ", x_size, y_size, z_size)
+
+    # create crop area mask
+    bbox_mask = sitk.Image(image_image.GetSize(), sitk.sitkUInt8)
+    bbox_mask.CopyInformation(image_image)
+
+    # fill the mask
+    bbox_mask[x0:x0 + vox_dims[0], y0:y0 + vox_dims[1], z0:z0 + vox_dims[2]] = 1
+
+    # debugging
+    print("original image size: ", image_image.GetSize())
+    print("voxel dimensions: ", vox_dims)
+    print("center of the tumor: ", x_cen, y_cen, z_cen)
+    print("starting point of the crop: ", x0, y0, z0)
+    print("spacing of the image: ", image_image.GetSpacing())
+
+    return bbox_mask, image_image
 
 
 def apply_bias_field_correction(

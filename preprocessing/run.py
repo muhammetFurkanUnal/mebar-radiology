@@ -1,7 +1,5 @@
 from lib import (
-    all_samples_loadable,
-    resample_image,
-    crop_ROI
+    all_samples_loadable
 )
 import pandas as pd
 from config import load_config, CONFIGS, NoAlignmentConfig
@@ -69,7 +67,7 @@ def run_pipeline(config, n):
     adc_pipeline = Pipeline(config, "ADC")
     t2_pipeline = Pipeline(config, "T2")
 
-    provider = SampleProvider(config, True)
+    provider = SampleProvider(config, False)
 
     loop_counter = 0
 
@@ -91,22 +89,21 @@ def run_pipeline(config, n):
         mask = mask_packet["image"]
         image = image_packet["image"]
 
-        try:
-            if modality == "ADC":
-                mask, image = adc_pipeline.run_pipeline(mask, image)
-            else:
-                mask, image = t2_pipeline.run_pipeline(mask, image)
-        except Exception as e:
-            print(f"error while processing sample with id:{mask_sample_id}\n{e}\n")
+        # try:
+        if modality == "ADC":
+            mask, image = adc_pipeline.run_pipeline(mask, image)
+        else:
+            mask, image = t2_pipeline.run_pipeline(mask, image)
+        # except Exception as e:
+        #     print(f"error while processing sample with id:{mask_sample_id}\n{e}\n")
         sitk.WriteImage(mask, f"{config.output_folder_path}/{mask_sample_id}_mask.nrrd")
         sitk.WriteImage(image, f"{config.output_folder_path}/{image_sample_id}_{modality}.nrrd")
-        
+
         print("===========================")
 
         loop_counter += 1
         if loop_counter >= n:
             break
-        
 
         
         
