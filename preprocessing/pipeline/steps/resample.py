@@ -14,15 +14,15 @@ class Resample:
         ):
         self.target_spacing = target_spacing
 
-    def step(self, mask, image):
-        mask = resample_image(
-            mask,
+    def step(self, ctx):
+        ctx.mask = resample_image(
+            ctx.mask,
             self.target_spacing,
             is_mask=True
         )
-        image = resample_image(
-            image,
+        ctx.image = resample_image(
+            ctx.image,
             self.target_spacing,
             is_mask=False
         )
-        return mask, image
+        return ctx

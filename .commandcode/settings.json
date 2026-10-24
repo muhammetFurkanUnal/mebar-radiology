@@ -1,7 +1,11 @@
 {
   "permissions": {
     "allow": [
-      "Shell(python -c  import SimpleITK as sitk img = sitk.Image((10,10,10), sitk.sitkUInt8) img.CopyInformation(img) try: img[2:5, 3:6, 4:7] = 1 print('slice assign OK', sitk.GetArrayViewFromImage(img).sum()) except Exception as e: print('SLICE ASSIGN FAIL', type(e).__name__, e)  2 >& 1)"
+      "Shell(python -c  import SimpleITK as sitk img = sitk.Image((10,10,10), sitk.sitkUInt8) img.CopyInformation(img) try: img[2:5, 3:6, 4:7] = 1 print('slice assign OK', sitk.GetArrayViewFromImage(img).sum()) except Exception as e: print('SLICE ASSIGN FAIL', type(e).__name__, e)  2 >& 1)",
+      "Shell(python -m py_compile pipeline/context.py)",
+      "Shell(python3 -m py_compile pipeline/context.py)",
+      "Shell(python3 -m py_compile pipeline/pipeline.py)",
+      "Shell(python3 -m py_compile pipeline/steps/write.py)"
     ],
     "deny": [],
     "defaultMode": "default"

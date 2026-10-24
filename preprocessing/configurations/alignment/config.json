@@ -1,5 +1,5 @@
 {
-	"excluded_sample_ids": [],
+	"excluded_sample_ids": ["2fa95f062483ba1b", "ed55bdea5c15aec8"],
 	"resample": {
 		"apply":true,
 		"spacing_mm": [0.5, 0.5, 3.0]

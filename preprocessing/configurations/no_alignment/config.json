@@ -1,6 +1,6 @@
 {
 	"manifest_path": "/Users/furkan/projects/mebar-radiology/data/manifest.csv",
-    "excluded_sample_ids": [],
+    "excluded_sample_ids": ["2fa95f062483ba1b", "ed55bdea5c15aec8"],
     "resample": {
 		"apply":true,
 		"ADC_spacing_mm": [1.3, 1.3, 4.6],
@@ -10,19 +10,20 @@
       	"apply":true,
       	"volume_mm": [54, 68, 70]
     },
+	"pad":{
+		"apply":true,
+		"ADC_tensor_size":[42, 52, 15],
+		"T2_tensor_size":[108, 136, 17]
+	},
     "bias_field_correction": {
-      	"apply": true
+      	"apply": true,
+		"shrink_factor": 4
     },
-    "T2_intensity": {
-		"interval": {
-			"apply":true,
-			"lower":0.005,
-			"upper":0.995
-		},
-		"zscore": {
-			"apply":true	
-		}
-    },
+    "intensity_threshold": {
+		"apply":true,
+		"upper":99.5,
+		"lower":0.05
+	},
 	"ADC_zero_negatives": {
 		"apply":true
 	},
@@ -32,6 +33,6 @@
 		"crop_out_of_bounds":true,
 		"global_zscore": true
 	},
-	"output_folder_path":"/Users/furkan/projects/mebar-radiology/preprocessing/output/no_alignment"
+	"output_folder_path":"/Users/furkan/projects/mebar-radiology/preprocessing/configurations/no_alignment/images"
 }
   

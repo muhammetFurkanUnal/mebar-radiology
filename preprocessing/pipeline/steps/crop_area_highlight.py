@@ -17,11 +17,11 @@ class CropAreaHighlight:
         self.volume_mm = volume_mm
         self.out_path = out_path
 
-    def step(self, mask, image):
-        mask, image = crop_area_highlight(
-            mask,
-            image,
+    def step(self, ctx):
+        ctx.mask, ctx.image = crop_area_highlight(
+            ctx.mask,
+            ctx.image,
             self.volume_mm,
             self.out_path
         )
-        return mask, image
+        return ctx

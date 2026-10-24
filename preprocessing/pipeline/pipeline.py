@@ -1,40 +1,68 @@
-from enum import Enum
 from config import (
     NoAlignmentConfig,
     AlignmentConfig
     )
 
+from .steps import (
+    Identity,
+    ZScoreNorm,
+    IntensityThreshold,
+    Resample,
+    BiasFieldCorrection,
+    CropROI,
+    Pad,
+    Checkpoint,
+    Write
+)
+
+
 class Pipeline:
-    def __init__(self, config, modality):
+    def __init__(self, config, modality, records=None):
+        self.records = records if records is not None else []
         self.pipeline = []
 
-        # if CURRENT CONFIGURATION
-        # no_alignment.json:
         if isinstance(config, NoAlignmentConfig):
-            from .steps import (
-                Resample,
-                CropROI,
-                CropAreaHighlight
-            )
-            resample = Resample(
-                target_spacing=config.resample.ADC_spacing_mm if modality == "ADC" else config.resample.T2_spacing_mm
-            )
-            self.pipeline.append(resample.step)
-            # crop_roi = CropROI(
-            #     volume_mm=config.crop.volume_mm
-            # )
-            # self.pipeline.append(crop_roi.step)
-            highlight = CropAreaHighlight(
-                volume_mm=config.crop.volume_mm
-            )
-            self.pipeline.append(highlight.step)
-
-        # if CURRENT CONFIGURATION
-        # alignment.json:
+            if modality == "ADC":
+                self.pipeline = self._build_ADC(config)
+            elif modality == "T2":
+                self.pipeline = self._build_T2(config)
+            else:
+                raise ValueError(f"unknown modality: {modality}")
         elif isinstance(config, AlignmentConfig):
             pass
 
-    def run_pipeline(self, mask, image):
+    def _build_ADC(self, config):
+        steps = [
+            Identity().step
+            # Resample(target_spacing=config.resample.ADC_spacing_mm).step,
+            # CropROI(volume_mm=config.crop.volume_mm).step,
+            # Checkpoint(self.records, "after_crop").step,
+            # Pad(target_size=config.pad.ADC_tensor_size).step,
+            # Checkpoint(self.records, "after_pad").step,
+        ]
+        # ADC-specific steps go here (ADC_zero_negatives, ADC_scale_imbalance_fix)
+        steps.append(Write().step)
+        return steps
+
+    def _build_T2(self, config):
+        steps = [
+            IntensityThreshold(
+                lower=config.intensity_threshold.lower,
+                upper=config.intensity_threshold.upper,
+            ).step
+            # ZScoreNorm().step
+            # BiasFieldCorrection(config.bias_field_correction.shrink_factor).step
+            # Resample(target_spacing=config.resample.T2_spacing_mm).step,
+            # CropROI(volume_mm=config.crop.volume_mm).step,
+            # Checkpoint(self.records, "after_crop").step,
+            # Pad(target_size=config.pad.T2_tensor_size).step,
+            # Checkpoint(self.records, "after_pad").step,
+        ]
+        # T2-specific steps go here (T2_intensity: interval + zscore)
+        steps.append(Write().step)
+        return steps
+
+    def run_pipeline(self, ctx):
         for step in self.pipeline:
-            mask, image = step(mask, image)
-        return mask, image
+            ctx = step(ctx)
+        return ctx

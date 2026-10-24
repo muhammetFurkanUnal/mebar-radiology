@@ -1,5 +1,4 @@
 .venv
 data/raw
 __pycache__
-preprocessing/configurations/output
-preprocessing/output
+preprocessing/configurations/no_alignment/images

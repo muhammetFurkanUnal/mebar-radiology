@@ -1,7 +1,16 @@
 """Preprocessing configurations.
 
-Each JSON file in `configurations/` has its own pydantic model below.
-Load one by its file name:
+Each configuration lives in its own folder under `configurations/`:
+
+    configurations/
+    ├── alignment/config.json
+    └── no_alignment/
+        ├── config.json
+        ├── images/                  (processed outputs)
+        └── pipeline_checkpoints.csv (run statistics)
+
+Each folder's config.json has its own pydantic model below.
+Load one by its folder name:
 
     from preprocessing.config import load_config
     cfg = load_config("no_alignment")
@@ -25,7 +34,7 @@ class Apply(BaseModel):
 class Crop(BaseModel):
     apply: bool
     volume_mm: tuple[float, float, float]
-
+    
 
 class Interval(BaseModel):
     apply: bool
@@ -36,6 +45,10 @@ class Interval(BaseModel):
 class Intensity(BaseModel):
     interval: Interval
     zscore: Apply
+
+class BiasFieldCorrection(BaseModel):
+    apply: bool
+    shrink_factor: int
 
 
 # --- alignment.json ------------------------------------------
@@ -56,6 +69,10 @@ class AlignmentConfig(BaseModel):
 
 # --- no_alignment.json ------------------------------------------------------
 
+class NoAlignmentPad(BaseModel):
+    apply: bool
+    ADC_tensor_size: list[int]
+    T2_tensor_size: list[int]
 
 class NoAlignmentResample(BaseModel):
     apply: bool
@@ -75,8 +92,9 @@ class NoAlignmentConfig(BaseModel):
     manifest_path: str
     resample: NoAlignmentResample
     crop: Crop
-    bias_field_correction: Apply
-    T2_intensity: Intensity
+    pad:NoAlignmentPad
+    bias_field_correction: BiasFieldCorrection
+    intensity_threshold: Interval
     ADC_zero_negatives: Apply
     ADC_scale_imbalance_fix: ADCScaleImbalanceFix
     output_folder_path: str
@@ -92,7 +110,7 @@ CONFIGS = {
 
 
 def load_config(name: str) -> AlignmentConfig | NoAlignmentConfig:
-    """Read `configurations/<name>.json` and return it as its pydantic model."""
-    with open(CONFIGS_DIR / f"{name}.json", encoding="utf-8") as f:
+    """Read `configurations/<name>/config.json` and return it as its pydantic model."""
+    with open(CONFIGS_DIR / name / "config.json", encoding="utf-8") as f:
         data = json.load(f)
     return CONFIGS[name](**data)
