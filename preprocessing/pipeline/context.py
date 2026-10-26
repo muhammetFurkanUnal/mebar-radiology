@@ -47,6 +47,6 @@ def sample_metrics(ctx: SampleContext, stage: str) -> dict:
         "image_out_path": ctx.image_out_path,
         "mask_out_path": ctx.mask_out_path,
     }
-    row.update(_img_metrics(ctx.image, "image"))
-    row.update(_img_metrics(ctx.mask, "mask"))
+    # row.update(_img_metrics(ctx.image, "image"))
+    # row.update(_img_metrics(ctx.mask, "mask"))
     return row

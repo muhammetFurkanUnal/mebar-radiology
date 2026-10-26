@@ -8,3 +8,4 @@ from .bias_field_corr import BiasFieldCorrection
 from .identity import Identity
 from .zscore import ZScoreNorm
 from .intensity_threshold import IntensityThreshold
+from .ADC_zeroes_fix import ADCZeroesFix

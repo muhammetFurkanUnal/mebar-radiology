@@ -5,7 +5,7 @@ current = Path.cwd()
 root = current.parent.parent
 sys.path.append(root)
 
-from lib import intensity_threshold
+from lib import T2_intensity_threshold
 
 
 class IntensityThreshold:
@@ -20,7 +20,7 @@ class IntensityThreshold:
         self.out_path = out_path
 
     def step(self, ctx):
-        ctx.image = intensity_threshold(
+        ctx.image = T2_intensity_threshold(
             ctx.image,
             self.lower,
             self.upper,

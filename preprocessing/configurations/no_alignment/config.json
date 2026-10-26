@@ -19,13 +19,15 @@
       	"apply": true,
 		"shrink_factor": 4
     },
-    "intensity_threshold": {
+    "T2_intensity_threshold": {
 		"apply":true,
 		"upper":99.5,
 		"lower":0.05
 	},
-	"ADC_zero_negatives": {
-		"apply":true
+	"ADC_intensity_threshold": {
+		"apply":true,
+		"upper":3000,
+		"lower":0
 	},
 	"ADC_scale_imbalance_fix": {
 		"apply":true,

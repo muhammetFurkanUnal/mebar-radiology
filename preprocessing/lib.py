@@ -274,7 +274,7 @@ def apply_zscore_norm_adc(
     pass
 
 
-def intensity_threshold(
+def T2_intensity_threshold(
     image_image: sitk.Image,
     lower: float,
     upper: float,
@@ -308,8 +308,35 @@ def intensity_threshold(
     return clipped
 
 
+def ADC_intensity_threshold(
+    image_image: sitk.Image,
+    lower: float,
+    upper: float,
+    out_path=None,
+) -> sitk.Image:
+    """Clamp intensities to the absolute `[lower, upper]` range.
+
+    Unlike `T2_intensity_threshold` (which uses percentiles), `lower` and
+    `upper` here are raw intensity bounds (e.g. 0 and 3000).
+    """
+    f_image = sitk.Cast(image_image, sitk.sitkFloat32)
+    f_array = sitk.GetArrayFromImage(f_image)
+
+    f_array = np.clip(f_array, lower, upper)
+
+    clipped = sitk.GetImageFromArray(f_array)
+    clipped.CopyInformation(image_image)
+
+    if out_path:
+        sitk.WriteImage(clipped, out_path)
+
+    return clipped
+
+
 def handle_adc_scaling_issue(
-    out_path
+    image_image:sitk.Image,
+    scale,
+    out_path=None
     ):
     # first handle small-large scaled imagings difference
     # second crop out of possible bound values [0, 3000]

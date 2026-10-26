@@ -94,8 +94,8 @@ class NoAlignmentConfig(BaseModel):
     crop: Crop
     pad:NoAlignmentPad
     bias_field_correction: BiasFieldCorrection
-    intensity_threshold: Interval
-    ADC_zero_negatives: Apply
+    T2_intensity_threshold: Interval
+    ADC_intensity_threshold: Interval
     ADC_scale_imbalance_fix: ADCScaleImbalanceFix
     output_folder_path: str
 
