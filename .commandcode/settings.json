@@ -5,7 +5,16 @@
       "Shell(python -m py_compile pipeline/context.py)",
       "Shell(python3 -m py_compile pipeline/context.py)",
       "Shell(python3 -m py_compile pipeline/pipeline.py)",
-      "Shell(python3 -m py_compile pipeline/steps/write.py)"
+      "Shell(python3 -m py_compile pipeline/steps/write.py)",
+      "Shell(.venv/bin/python:*)",
+      "Shell(nvidia-smi:*)",
+      "Shell(nvcc:*)",
+      "Shell(cat:*)",
+      "Shell(ldd:*)",
+      "Shell(cd /home/furkan/projects/mebar-radiology; echo \"=== venv python ===\"; .venv/bin/python --version; cat .venv/pyvenv.cfg; echo; echo \"=== venv pip freeze ===\"; .venv/bin/pip freeze 2>/dev/null; echo; echo \"=== system pythons ===\"; ls /usr/bin/python3* 2>/dev/null)",
+      "Shell(.venv/bin/pip:*)",
+      "Shell(df:*)",
+      "Shell(/home/furkan/projects/mebar-radiology/.venv/bin/python:*)"
     ],
     "deny": [],
     "defaultMode": "default"

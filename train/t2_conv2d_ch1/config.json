@@ -1,0 +1,16 @@
+{
+    "name": "baseline",
+    "batch_size":32,
+    "seed":42,
+    "manifest_path":"/home/furkan/projects/mebar-radiology/preprocessing/configurations/no_alignment/images_2d/manifest.csv",
+    "optimizer":{
+        "name":"adamw",
+        "lr":3e-4,
+        "weight_decay":1e-2
+    },
+    "transform":null,
+    "epochs":500,
+    "early_stop":500,
+    "ckp_best_check_frq":5,
+    "ckp_frq":50
+}

@@ -2,3 +2,5 @@
 data/raw
 __pycache__
 preprocessing/configurations/no_alignment/images
+preprocessing/configurations/no_alignment/images_2d
+runs
