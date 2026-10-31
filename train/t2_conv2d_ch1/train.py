@@ -13,6 +13,7 @@ from torch.utils.tensorboard import SummaryWriter
 from torch.utils.data import DataLoader
 from torch.nn import CrossEntropyLoss
 from config import config
+from monai.data.utils import worker_init_fn
 
 PARENT = Path(__file__).resolve().parents[1]
 SCRIPT_DIR = Path(__file__).resolve().parents[0]
@@ -35,9 +36,17 @@ def build_optimizer(model, config):
         )
 
 def build_loaders(config):
+    if config.transform:
+        from transform import train_transform, test_transform
+    else:
+        train_transform = None
+        test_transform = None
+
     train_set, test_set = build_dataset(
         manifest_path=config.manifest_path,
         test_split_ratio=0.2,
+        train_transform=train_transform,
+        test_transform=test_transform
     )
 
     batch_size = config.batch_size
@@ -46,14 +55,16 @@ def build_loaders(config):
         batch_size=batch_size,
         shuffle=True,
         num_workers=4,
-        pin_memory=True
+        pin_memory=True,
+        worker_init_fn=worker_init_fn
     )
 
     testloader = DataLoader(
         test_set,
         batch_size=batch_size,
         num_workers=4,
-        pin_memory=True
+        pin_memory=True,
+        worker_init_fn=worker_init_fn
     )
 
     return trainloader, testloader

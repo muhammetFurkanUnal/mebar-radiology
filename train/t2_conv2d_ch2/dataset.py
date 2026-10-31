@@ -9,8 +9,7 @@ from torch.utils.data import Dataset
 
 class Sample(NamedTuple):
     sample_id: str
-    image: torch.Tensor
-    mask: torch.Tensor
+    image_w_mask: torch.Tensor
     label: bool
 
 
@@ -51,10 +50,13 @@ class T2Conv2DDataset(Dataset):
         image = self._read_slice(self.root / row["image_path"])
         mask = self._read_slice(self.root / row["mask_path"])
 
+        sample = {"image":image, "mask":mask}
         if self.transform is not None:
-            image, mask = self.transform(image, mask)
+            sample = self.transform(sample)
 
-        return Sample(sample_id=row["sample_id"], image=image, mask=mask, label=bool(row["label"]))
+        image_w_mask = torch.cat([sample["image"], sample["mask"].to(sample["image"].dtype)], dim=0)
+
+        return Sample(sample_id=row["sample_id"], image_w_mask=image_w_mask, label=bool(row["label"]))
 
     def _read_slice(self, path: Path) -> torch.Tensor:
         # Reads one 2D slice and returns a single-channel float tensor.
@@ -103,3 +105,21 @@ def build_dataset(
         manifest=manifest.loc[is_test],
     )
     return train_dataset, test_dataset
+
+
+if __name__ == "__main__":
+    from config import config
+    if config.transform:
+        from transform import train_transform, test_transform
+    else:
+        train_transform = None
+        test_transform = None
+
+    train_set, test_set = build_dataset(
+        manifest_path=config.manifest_path,
+        test_split_ratio=0.2,
+        train_transform=train_transform,
+        test_transform=test_transform
+    )
+
+    print(train_set[0])

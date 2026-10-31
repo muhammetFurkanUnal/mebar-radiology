@@ -9,7 +9,7 @@ class T2Conv2DModel_Ch1(nn.Module):
         super().__init__()
         self.conv1 = nn.Sequential(
             nn.Conv2d(
-                in_channels=1,
+                in_channels=2,
                 out_channels=4,
                 padding=1,
                 kernel_size=3,

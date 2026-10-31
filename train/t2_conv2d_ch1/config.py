@@ -13,7 +13,29 @@ class OptimizerConfig(BaseModel):
 
 
 class TransformConfig(BaseModel):
-    pass
+    rnd_h_flip_p: float
+    rnd_rot_deg: float
+    rnd_aff_p: float
+    rnd_down_scale: float
+    rnd_up_scale: float
+    translate_down: float
+    translate_up: float
+    intensity_scale_p: float
+    intensity_scale_factor: float
+    shift_intensity_p: float
+    shift_intensity_offsets: float
+    adjust_contrast_p: float
+    adjust_contrast_gamma: tuple[float, float]
+    gaussian_noise_p: float
+    gaussian_noise_mean: float
+    gaussian_noise_std: float
+    gaussian_smooth_p: float
+    gaussian_smooth_sigma_x: tuple[float, float]
+    gaussian_smooth_sigma_y: tuple[float, float]
+    bias_field_p: float
+    bias_field_coeff_range: tuple[float, float]
+    bias_field_degree: int
+
 
 class Config(BaseModel):
     name: str

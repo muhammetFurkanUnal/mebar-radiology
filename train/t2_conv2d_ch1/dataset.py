@@ -51,10 +51,16 @@ class T2Conv2DDataset(Dataset):
         image = self._read_slice(self.root / row["image_path"])
         mask = self._read_slice(self.root / row["mask_path"])
 
+        sample = {"image":image, "mask":mask}
         if self.transform is not None:
-            image, mask = self.transform(image, mask)
+            sample = self.transform(sample)
 
-        return Sample(sample_id=row["sample_id"], image=image, mask=mask, label=bool(row["label"]))
+        return Sample(
+            sample_id=row["sample_id"], 
+            image=sample["image"], 
+            mask=sample["mask"], 
+            label=bool(row["label"])
+        )
 
     def _read_slice(self, path: Path) -> torch.Tensor:
         # Reads one 2D slice and returns a single-channel float tensor.
