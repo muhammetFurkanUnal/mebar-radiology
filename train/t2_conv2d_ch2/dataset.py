@@ -11,6 +11,7 @@ class Sample(NamedTuple):
     sample_id: str
     image_w_mask: torch.Tensor
     label: bool
+    slice_idx: int
 
 
 class T2Conv2DDataset(Dataset):
@@ -56,7 +57,12 @@ class T2Conv2DDataset(Dataset):
 
         image_w_mask = torch.cat([sample["image"], sample["mask"].to(sample["image"].dtype)], dim=0)
 
-        return Sample(sample_id=row["sample_id"], image_w_mask=image_w_mask, label=bool(row["label"]))
+        return Sample(
+            sample_id=row["sample_id"], 
+            image_w_mask=image_w_mask, 
+            label=bool(row["label"]),
+            slice_idx=row["slice_index (1-first)"]
+        )
 
     def _read_slice(self, path: Path) -> torch.Tensor:
         # Reads one 2D slice and returns a single-channel float tensor.

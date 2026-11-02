@@ -3,7 +3,7 @@ import torch.nn.functional as F
 from torchinfo import summary
 
 
-class T2Conv2DModel_Ch1(nn.Module):
+class T2Conv2DModel_Ch2(nn.Module):
     # single channel model, masks are ignored
     def __init__(self):
         super().__init__()
@@ -77,7 +77,7 @@ class T2Conv2DModel_Ch1(nn.Module):
 
 
 def main() -> int:
-    model = T2Conv2DModel_Ch1()
+    model = T2Conv2DModel_Ch2()
     stats = summary(
         model,
         input_size=(1, 1, 136, 108),

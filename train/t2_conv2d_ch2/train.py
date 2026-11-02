@@ -8,7 +8,7 @@ import time
 import torch
 import torchvision
 from dataset import build_dataset
-from model import T2Conv2DModel_Ch1
+from model import T2Conv2DModel_Ch2
 from torch.utils.tensorboard import SummaryWriter
 from torch.utils.data import DataLoader
 from torch.nn import CrossEntropyLoss
@@ -23,7 +23,7 @@ from lib import *
 writer = SummaryWriter(SCRIPT_DIR / "runs" / config.name)
 
 def build_model():
-    return T2Conv2DModel_Ch1()
+    return T2Conv2DModel_Ch2()
 
 def build_optimizer(model, config):
     opt_cfg = config.optimizer
@@ -70,7 +70,7 @@ def build_loaders(config):
     return trainloader, testloader
 
 
-if __name__ == "__main__":
+def train_pytorch():
     device = "cuda" if torch.cuda.is_available() else "cpu"
     print("Device: ", device)
 
@@ -86,7 +86,7 @@ if __name__ == "__main__":
 
     trainloader, testloader = build_loaders(config)
 
-    prep_run_folder(SCRIPT_DIR, config)
+    prep_train_run_folder(SCRIPT_DIR, config)
     ckptManager = CheckpointManager(SCRIPT_DIR, config.name, model, optimizer)
 
     best_acc = 0
@@ -157,4 +157,30 @@ if __name__ == "__main__":
             best_ep = epoch
 
     print("best epoch: ", best_ep)
+
+
+def train_xgboost():
+    pass
+
+
+def main():
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Train model with PyTorch or XGBoost.")
+    parser.add_argument(
+        "framework",
+        choices=["pytorch", "xgboost"],
+        help="Training framework: 'pytorch' or 'xgboost'",
+    )
+    args = parser.parse_args()
+
+    if args.framework == "pytorch":
+        train_pytorch()
+    elif args.framework == "xgboost":
+        train_xgboost()
+
+
+if __name__ == "__main__":
+    main()
+
 

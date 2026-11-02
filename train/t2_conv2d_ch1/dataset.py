@@ -12,6 +12,7 @@ class Sample(NamedTuple):
     image: torch.Tensor
     mask: torch.Tensor
     label: bool
+    slice_idx: int
 
 
 class T2Conv2DDataset(Dataset):
@@ -59,7 +60,8 @@ class T2Conv2DDataset(Dataset):
             sample_id=row["sample_id"], 
             image=sample["image"], 
             mask=sample["mask"], 
-            label=bool(row["label"])
+            label=bool(row["label"]),
+            slice_idx=row["slice_index (1-first)"]
         )
 
     def _read_slice(self, path: Path) -> torch.Tensor:

@@ -1,5 +1,5 @@
 {
-    "name": "base_transform",
+    "name": "baseline",
     "batch_size":32,
     "seed":42,
     "manifest_path":"/home/furkan/projects/mebar-radiology/preprocessing/configurations/no_alignment/images_2d/manifest.csv",
@@ -8,32 +8,20 @@
         "lr":3e-4,
         "weight_decay":1e-2
     },
-    "transform":{
-        "rnd_h_flip_p":0.5,
-        "rnd_rot_deg":10,
-        "rnd_aff_p":0.5,
-        "rnd_down_scale": 0.05,
-        "rnd_up_scale": 0.05,
-        "translate_down": 5,
-        "translate_up": 5,
-        "intensity_scale_p": 0.2,
-        "intensity_scale_factor": 0.1,
-        "shift_intensity_p": 0.3,
-        "shift_intensity_offsets": 0.1,
-        "adjust_contrast_p": 0.3,
-        "adjust_contrast_gamma": [0.8, 1.25],
-        "gaussian_noise_p": 0.2,
-        "gaussian_noise_mean": 0.0,
-        "gaussian_noise_std": 0.03,
-        "gaussian_smooth_p": 0.2,
-        "gaussian_smooth_sigma_x": [0.25, 0.75],
-        "gaussian_smooth_sigma_y": [0.25, 0.75],
-        "bias_field_p": 0.2,
-        "bias_field_coeff_range": [0.0, 0.05],
-        "bias_field_degree": 3
-    },
-    "epochs":500,
+    "transform":null,
+    "epochs":1000,
     "early_stop":500,
     "ckp_best_check_frq":5,
-    "ckp_frq":50
+    "ckp_frq":50,
+    "xgboost": {
+        "csv_path": "",
+        "n_estimators": 1000,
+        "learning_rate": 0.05,
+        "max_depth": 4,
+        "subsample": 0.8,
+        "colsample_bytree": 0.8,
+        "eval_metric": "logloss",
+        "early_stopping_rounds": 50,
+        "random_state": 42
+    }
 }

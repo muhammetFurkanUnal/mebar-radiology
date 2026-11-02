@@ -1,8 +1,4 @@
-from datetime import datetime
 from pathlib import Path
-from IPython.display import display
-import socket
-import subprocess
 import sys
 import time
 import torch
@@ -70,7 +66,7 @@ def build_loaders(config):
     return trainloader, testloader
 
 
-if __name__ == "__main__":
+def train_pytorch():
     device = "cuda" if torch.cuda.is_available() else "cpu"
     print("Device: ", device)
 
@@ -86,7 +82,7 @@ if __name__ == "__main__":
 
     trainloader, testloader = build_loaders(config)
 
-    prep_run_folder(SCRIPT_DIR, config)
+    prep_train_run_folder(SCRIPT_DIR, config)
     ckptManager = CheckpointManager(SCRIPT_DIR, config.name, model, optimizer)
 
     best_acc = 0
@@ -158,3 +154,29 @@ if __name__ == "__main__":
 
     print("best epoch: ", best_ep)
 
+
+
+
+def train_xgboost():
+    pass
+
+
+def main():
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Train model with PyTorch or XGBoost.")
+    parser.add_argument(
+        "framework",
+        choices=["pytorch", "xgboost"],
+        help="Training framework: 'pytorch' or 'xgboost'",
+    )
+    args = parser.parse_args()
+
+    if args.framework == "pytorch":
+        train_pytorch()
+    elif args.framework == "xgboost":
+        train_xgboost()
+
+
+if __name__ == "__main__":
+    main()

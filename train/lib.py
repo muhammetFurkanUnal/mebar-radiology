@@ -2,7 +2,7 @@ from pathlib import Path
 import shutil
 import torch
 
-def prep_run_folder(cwd, config):
+def prep_train_run_folder(cwd, config):
     cwd = Path(cwd)
     config_path = cwd / "config.json"
     run_dir = cwd / "runs" / config.name
@@ -12,6 +12,13 @@ def prep_run_folder(cwd, config):
     if not dst.exists():
         shutil.copy2(config_path, dst)
 
+    return run_dir
+
+
+def prep_test_folder(cwd, config):
+    cwd = Path(cwd)
+    run_dir = cwd / "runs" / config.name
+    (run_dir / "inference").mkdir(parents=True, exist_ok=True)
     return run_dir
 
 class CheckpointManager:
@@ -55,21 +62,30 @@ class CheckpointManager:
         return max(epochs) if epochs else None
  
     def load(self, which="latest", model_only=False, strict=True):
-        """which: an epoch number (e.g. 50 -> ep50.pt) or "latest".
+        """which: an epoch number (e.g. 50 -> ep50.pt), "latest", "best",
+        or a specific filename (e.g. "best.pt", "ep14.pt").
         With model_only=True, optimizer and scheduler states are not
         restored (for evaluation / inference).
         Returns the saved (0-indexed) epoch."""
-        if which == "latest":
+        which_str = str(which).strip()
+
+        if which_str.endswith(".pt"):
+            path = self.ckpt_dir / which_str
+        elif which_str == "latest":
             n = self.latest_epoch()
             if n is None:
                 raise FileNotFoundError(f"No checkpoints in {self.ckpt_dir}")
-            name = f"ep{n}"
-        elif which == "best":
-            name = "best"
+            path = self.ckpt_dir / f"ep{n}.pt"
+        elif which_str == "best":
+            path = self.ckpt_dir / "best.pt"
+        elif which_str.isdigit():
+            path = self.ckpt_dir / f"ep{int(which_str)}.pt"
         else:
-            name = f"ep{int(which)}"
-        
-        path = self.ckpt_dir / f"{name}.pt"
+            path = self.ckpt_dir / f"{which_str}.pt"
+
+        if not path.exists():
+            raise FileNotFoundError(f"Checkpoint not found: {path}")
+
         state = torch.load(path, map_location="cpu", weights_only=True)
  
         self.model.load_state_dict(state["model"], strict=strict)
@@ -79,4 +95,4 @@ class CheckpointManager:
             if self.scheduler is not None and "scheduler" in state:
                 self.scheduler.load_state_dict(state["scheduler"])
  
-        return state["epoch"]
+        return state.get("epoch", -1)
