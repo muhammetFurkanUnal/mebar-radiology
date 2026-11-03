@@ -50,17 +50,23 @@ class TransformConfig(BaseModel):
     bias_field_degree: int
 
 
-class Config(BaseModel):
-    name: str
+class CNNConfig(BaseModel):
     batch_size: int
     seed: int
-    manifest_path:str
+    manifest_path: str
     optimizer: OptimizerConfig
     transform: TransformConfig | None = None
     epochs: int
     early_stop: int
     ckp_frq: int
     ckp_best_check_frq: int
+    channels: list[int]
+    w_mask: bool
+
+
+class Config(BaseModel):
+    name: str
+    cnn: CNNConfig
     xgboost: XGBoostConfig | None = None
 
 

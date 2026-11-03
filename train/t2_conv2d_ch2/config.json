@@ -37,7 +37,7 @@
     "ckp_best_check_frq":5,
     "ckp_frq":50,
     "xgboost": {
-        "csv_path": "",
+        "csv_path": "/home/furkan/projects/mebar-radiology/train/t2_conv2d_ch2/xgboost/data/baseline_ep1000_joined.csv",
         "n_estimators": 1000,
         "learning_rate": 0.05,
         "max_depth": 4,

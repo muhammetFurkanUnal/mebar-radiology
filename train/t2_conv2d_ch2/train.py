@@ -1,8 +1,5 @@
 from datetime import datetime
 from pathlib import Path
-from IPython.display import display
-import socket
-import subprocess
 import sys
 import time
 import torch
@@ -159,8 +156,130 @@ def train_pytorch():
     print("best epoch: ", best_ep)
 
 
+def prepare_xgb_data(config, test_split_ratio: float = 0.2):
+    import pandas as pd
+
+    train_set, test_set = build_dataset(
+        manifest_path=config.manifest_path,
+        test_split_ratio=test_split_ratio,
+        seed=config.seed,
+    )
+
+    train_ids = set(train_set.manifest["sample_id"].unique())
+    test_ids = set(test_set.manifest["sample_id"].unique())
+
+    xgb_df = pd.read_csv(config.xgboost.csv_path)
+    xgb_df["sample_id"] = xgb_df["sample_id"].astype(str)
+
+    missing_train = train_ids - set(xgb_df["sample_id"])
+    missing_test = test_ids - set(xgb_df["sample_id"])
+    if missing_train or missing_test:
+        raise ValueError(
+            f"Sample ID mismatch between PyTorch manifest and XGBoost CSV. "
+            f"Missing in XGBoost CSV -> Train: {len(missing_train)}, Test: {len(missing_test)}"
+        )
+
+    train_df = xgb_df[xgb_df["sample_id"].isin(train_ids)].reset_index(drop=True)
+    test_df = xgb_df[xgb_df["sample_id"].isin(test_ids)].reset_index(drop=True)
+
+    X_train = train_df.drop(columns=["sample_id", "label"])
+    y_train = train_df["label"]
+
+    X_test = test_df.drop(columns=["sample_id", "label"])
+    y_test = test_df["label"]
+
+    return X_train, X_test, y_train, y_test
+
+
 def train_xgboost():
-    pass
+    import xgboost as xgb
+    import optuna
+    import numpy as np
+    from sklearn.metrics import accuracy_score, log_loss, roc_auc_score
+    from sklearn.model_selection import StratifiedKFold
+    from sklearn.dummy import DummyClassifier
+
+    optuna.logging.set_verbosity(optuna.logging.WARNING)
+
+    cfg_xgb = config.xgboost
+    seed = cfg_xgb.random_state
+    X_train, X_test, y_train, y_test = prepare_xgb_data(config, 0.2)
+
+    skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=seed)
+    folds = list(skf.split(X_train, y_train))  # her denemede aynı fold'lar
+
+    fixed_params = {
+        "eval_metric": "logloss",
+        "tree_method": "hist",
+        "n_jobs": -1,
+        "random_state": seed,
+    }
+
+    def objective(trial):
+        params = {
+            **fixed_params,
+            "n_estimators": 2000,
+            "early_stopping_rounds": 50,
+            "learning_rate": trial.suggest_float("learning_rate", 0.01, 0.2, log=True),
+            "max_depth": trial.suggest_int("max_depth", 2, 6),
+            "min_child_weight": trial.suggest_float("min_child_weight", 1, 20, log=True),
+            "gamma": trial.suggest_float("gamma", 1e-8, 5.0, log=True),
+            "reg_lambda": trial.suggest_float("reg_lambda", 1e-3, 50, log=True),
+            "reg_alpha": trial.suggest_float("reg_alpha", 1e-8, 10, log=True),
+            "subsample": trial.suggest_float("subsample", 0.5, 1.0),
+            "colsample_bytree": trial.suggest_float("colsample_bytree", 0.3, 1.0),
+        }
+
+        losses, best_iters = [], []
+        for i, (tr_idx, val_idx) in enumerate(folds):
+            X_tr, X_val = X_train.iloc[tr_idx], X_train.iloc[val_idx]
+            y_tr, y_val = y_train.iloc[tr_idx], y_train.iloc[val_idx]
+
+            clf = xgb.XGBClassifier(**params)
+            clf.fit(X_tr, y_tr, eval_set=[(X_val, y_val)], verbose=False)
+
+            proba = clf.predict_proba(X_val)[:, 1]
+            losses.append(log_loss(y_val, proba))
+            best_iters.append(clf.best_iteration + 1)
+
+            trial.report(np.mean(losses), i)
+            if trial.should_prune():
+                raise optuna.TrialPruned()
+
+        trial.set_user_attr("n_estimators", int(np.mean(best_iters)))
+        trial.set_user_attr("cv_std", float(np.std(losses)))
+        return float(np.mean(losses))
+
+    study = optuna.create_study(
+        direction="minimize",
+        sampler=optuna.samplers.TPESampler(seed=seed),
+        pruner=optuna.pruners.MedianPruner(n_startup_trials=10, n_warmup_steps=1),
+    )
+    study.optimize(objective, n_trials=100)
+
+    best = study.best_trial
+    print("CONFIGURATION:", config.name)
+    print(f"Best CV log loss: {best.value:.4f} ± {best.user_attrs['cv_std']:.4f}")
+    print("Best params:", best.params)
+    print("n_estimators:", best.user_attrs["n_estimators"])
+
+    best_model = xgb.XGBClassifier(
+        **fixed_params, **best.params,
+        n_estimators=best.user_attrs["n_estimators"],
+    )
+    best_model.fit(X_train, y_train)
+
+    # Referans: hep çoğunluk sınıfını tahmin eden model
+    dummy = DummyClassifier(strategy="most_frequent").fit(X_train, y_train)
+    print("Baseline test accuracy:", accuracy_score(y_test, dummy.predict(X_test)))
+
+    test_proba = best_model.predict_proba(X_test)[:, 1]
+    print("Train accuracy:", accuracy_score(y_train, best_model.predict(X_train)))
+    print("Test accuracy: ", accuracy_score(y_test, (test_proba >= 0.5).astype(int)))
+    print("Test log loss: ", log_loss(y_test, test_proba))
+    print("Test ROC-AUC:  ", roc_auc_score(y_test, test_proba))
+
+    return best_model, study
 
 
 def main():

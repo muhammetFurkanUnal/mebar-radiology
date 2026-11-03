@@ -1,20 +1,24 @@
 {
     "name": "baseline",
-    "batch_size":32,
-    "seed":42,
-    "manifest_path":"/home/furkan/projects/mebar-radiology/preprocessing/configurations/no_alignment/images_2d/manifest.csv",
-    "optimizer":{
-        "name":"adamw",
-        "lr":3e-4,
-        "weight_decay":1e-2
+    "cnn": {
+        "batch_size": 32,
+        "seed": 42,
+        "manifest_path": "/home/furkan/projects/mebar-radiology/preprocessing/configurations/no_alignment/images_2d/manifest.csv",
+        "optimizer": {
+            "name": "adamw",
+            "lr": 3e-4,
+            "weight_decay": 1e-2
+        },
+        "transform": null,
+        "epochs": 1000,
+        "early_stop": 500,
+        "ckp_best_check_frq": 5,
+        "ckp_frq": 50,
+        "channels":[],
+        "w_mask":true
     },
-    "transform":null,
-    "epochs":1000,
-    "early_stop":500,
-    "ckp_best_check_frq":5,
-    "ckp_frq":50,
     "xgboost": {
-        "csv_path": "",
+        "csv_path": "/home/furkan/projects/mebar-radiology/train/t2_conv2d_ch1/xgboost/data/baseline_ep1000_joined.csv",
         "n_estimators": 1000,
         "learning_rate": 0.05,
         "max_depth": 4,

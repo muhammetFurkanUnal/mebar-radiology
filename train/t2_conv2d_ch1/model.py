@@ -1,15 +1,16 @@
 import torch.nn as nn
 import torch.nn.functional as F
 from torchinfo import summary
-
+from config import config
 
 class T2Conv2DModel_Ch1(nn.Module):
     # single channel model, masks are ignored
     def __init__(self):
         super().__init__()
+        w_mask = config.cnn.w_mask
         self.conv1 = nn.Sequential(
             nn.Conv2d(
-                in_channels=1,
+                in_channels=2 if w_mask else 1,
                 out_channels=4,
                 padding=1,
                 kernel_size=3,
@@ -78,9 +79,12 @@ class T2Conv2DModel_Ch1(nn.Module):
 
 def main() -> int:
     model = T2Conv2DModel_Ch1()
+
+    w_mask = config.cnn.w_mask
+    num_ch = 2 if w_mask else 1
     stats = summary(
         model,
-        input_size=(1, 1, 136, 108),
+        input_size=(num_ch, 1, 136, 108),
         verbose=2,
         col_names=("input_size", "output_size", "num_params", "mult_adds"),
         device="cpu",

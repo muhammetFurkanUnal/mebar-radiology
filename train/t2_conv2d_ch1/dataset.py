@@ -6,11 +6,11 @@ import pandas as pd
 import torch
 from torch.utils.data import Dataset
 
+from config import config
 
 class Sample(NamedTuple):
     sample_id: str
     image: torch.Tensor
-    mask: torch.Tensor
     label: bool
     slice_idx: int
 
@@ -56,10 +56,14 @@ class T2Conv2DDataset(Dataset):
         if self.transform is not None:
             sample = self.transform(sample)
 
+        if config.cnn.w_mask:
+            image = torch.cat([sample["image"], sample["mask"].to(sample["image"].dtype)], dim=0)
+        else:
+            image = sample["image"]
+
         return Sample(
             sample_id=row["sample_id"], 
-            image=sample["image"], 
-            mask=sample["mask"], 
+            image=image,
             label=bool(row["label"]),
             slice_idx=row["slice_index (1-first)"]
         )
