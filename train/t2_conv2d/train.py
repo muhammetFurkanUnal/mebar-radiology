@@ -1,11 +1,10 @@
-from datetime import datetime
 from pathlib import Path
 import sys
 import time
 import torch
 import torchvision
 from dataset import build_dataset
-from model import T2Conv2DModel_Ch2
+from model import T2Conv2DModel_Ch1
 from torch.utils.tensorboard import SummaryWriter
 from torch.utils.data import DataLoader
 from torch.nn import CrossEntropyLoss
@@ -20,10 +19,10 @@ from lib import *
 writer = SummaryWriter(SCRIPT_DIR / "runs" / config.name)
 
 def build_model():
-    return T2Conv2DModel_Ch2()
+    return T2Conv2DModel_Ch1()
 
 def build_optimizer(model, config):
-    opt_cfg = config.optimizer
+    opt_cfg = config.cnn.optimizer
     if opt_cfg.name == "adamw":
         from torch.optim import AdamW
         return AdamW(
@@ -33,20 +32,21 @@ def build_optimizer(model, config):
         )
 
 def build_loaders(config):
-    if config.transform:
+    if config.cnn.transform:
         from transform import train_transform, test_transform
     else:
         train_transform = None
         test_transform = None
 
     train_set, test_set = build_dataset(
-        manifest_path=config.manifest_path,
+        manifest_path=config.cnn.manifest_path,
         test_split_ratio=0.2,
         train_transform=train_transform,
-        test_transform=test_transform
+        test_transform=test_transform,
+        seed=config.cnn.seed,
     )
 
-    batch_size = config.batch_size
+    batch_size = config.cnn.batch_size
     trainloader = DataLoader(
         train_set,
         batch_size=batch_size,
@@ -71,7 +71,7 @@ def train_pytorch():
     device = "cuda" if torch.cuda.is_available() else "cpu"
     print("Device: ", device)
 
-    seed = config.seed
+    seed = config.cnn.seed
     torch.manual_seed(seed)
     torch.cuda.manual_seed_all(seed)
 
@@ -85,11 +85,14 @@ def train_pytorch():
 
     prep_train_run_folder(SCRIPT_DIR, config)
     ckptManager = CheckpointManager(SCRIPT_DIR, config.name, model, optimizer)
+    
+    print(model)
+    sample = trainloader.dataset[0]
+    print("Sample image size:", sample.image.size())
 
     best_acc = 0
     best_ep = -1
-    for epoch in range(config.epochs):
-
+    for epoch in range(config.cnn.epochs):
         # training
         train_loss = 0.
         num_batches = 0
@@ -97,7 +100,7 @@ def train_pytorch():
         total_data = 0
         model.train(True)
         for batch in trainloader:
-            inputs, labels = batch.image_w_mask, batch.label
+            inputs, labels = batch.image, batch.label
             inputs = inputs.to(device)
             labels = labels.long().to(device)
 
@@ -114,7 +117,7 @@ def train_pytorch():
         
         train_loss = train_loss/num_batches
         train_acc = total_correct / total_data
-        print(f"Epochs [{epoch}/{config.epochs}]")
+        print(f"Epochs [{epoch}/{config.cnn.epochs}]")
         writer.add_scalar("Train/Loss", train_loss, epoch)
         writer.add_scalar("Train/Acc.", train_acc, epoch)
 
@@ -126,7 +129,7 @@ def train_pytorch():
         model.eval()
         with torch.no_grad():
             for batch in testloader:
-                inputs, labels = batch.image_w_mask, batch.label
+                inputs, labels = batch.image, batch.label
                 inputs = inputs.to(device)
                 labels = labels.long().to(device)
 
@@ -145,10 +148,10 @@ def train_pytorch():
 
         writer.flush()
 
-        if (epoch+1) % config.ckp_frq == 0:
+        if (epoch+1) % config.cnn.ckp_frq == 0:
             ckptManager.save(epoch)
 
-        if (epoch+1) % config.ckp_best_check_frq == 0 and test_acc > best_acc:
+        if (epoch+1) % config.cnn.ckp_best_check_frq == 0 and test_acc > best_acc:
             best_acc = test_acc
             ckptManager.save(epoch, best=True)
             best_ep = epoch
@@ -156,13 +159,15 @@ def train_pytorch():
     print("best epoch: ", best_ep)
 
 
+
+
 def prepare_xgb_data(config, test_split_ratio: float = 0.2):
     import pandas as pd
 
     train_set, test_set = build_dataset(
-        manifest_path=config.manifest_path,
+        manifest_path=config.cnn.manifest_path,
         test_split_ratio=test_split_ratio,
-        seed=config.seed,
+        seed=config.cnn.seed,
     )
 
     train_ids = set(train_set.manifest["sample_id"].unique())
@@ -282,6 +287,7 @@ def train_xgboost():
     return best_model, study
 
 
+    
 def main():
     import argparse
 
@@ -301,5 +307,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-

@@ -1,5 +1,0 @@
-{
-    "name": "base_transform",
-    "test_csv_filename": "ep1000_results.csv",
-    "model_pt_filename": "ep1000.pt"
-}

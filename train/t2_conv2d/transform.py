@@ -9,7 +9,7 @@ from monai.transforms import (
 )
 from config import config
 
-cfg = config.transform
+cfg = config.cnn.transform
 
 train_transform = Compose([
     EnsureChannelFirstd(keys=["image", "mask"], channel_dim=0),
